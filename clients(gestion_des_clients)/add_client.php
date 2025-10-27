@@ -1,0 +1,224 @@
+<?php
+require_once '../config.php';
+
+if (!isLoggedIn()) {
+    redirect('../index.php');
+}
+
+$user_id = $_SESSION['user_id'];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $address = $_POST['address'];
+    $phone = $_POST['phone'];
+    $notes = $_POST['notes'];
+    
+    $stmt = $pdo->prepare("
+        INSERT INTO clients (user_id, name, email, address, phone, notes) 
+        VALUES (?, ?, ?, ?, ?, ?)
+    ");
+    
+    if ($stmt->execute([$user_id, $name, $email, $address, $phone, $notes])) {
+        redirect('clients.php?success=created');
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouveau client - FacturePro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --dark: #212529;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --border-radius: 8px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: white;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            transition: background 0.3s;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>FacturePro</span>
+                </div>
+                <div class="nav-links">
+                    <a href="../dashboard.php"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a>
+                    <a href="../invoices/invoices.php"><i class="fas fa-file-invoice"></i> Factures</a>
+                    <a href="clients.php" class="active"><i class="fas fa-users"></i> Clients</a>
+                    <a href="../profile/profile.php"><i class="fas fa-user"></i> Mon profil</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="section-title">
+                <i class="fas fa-user-plus"></i>
+                <h1>Nouveau client</h1>
+            </div>
+            
+            <form method="POST" action="">
+                <div class="form-group">
+                    <label for="name">Nom / Entreprise *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Téléphone</label>
+                    <input type="text" id="phone" name="phone">
+                </div>
+                
+                <div class="form-group">
+                    <label for="address">Adresse</label>
+                    <textarea id="address" name="address" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" name="notes" rows="3" placeholder="Informations supplémentaires..."></textarea>
+                </div>
+                
+                <div class="actions">
+                    <a href="clients.php" class="btn" style="background: #6c757d; color: white;">
+                        <i class="fas fa-times"></i> Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Créer le client
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
